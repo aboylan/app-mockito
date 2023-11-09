@@ -3,6 +3,8 @@ package org.aboylan.appmockito.ejemplos.services;
 import org.aboylan.appmockito.ejemplos.models.Examen;
 import org.aboylan.appmockito.ejemplos.repositories.ExamenRepository;
 import org.aboylan.appmockito.ejemplos.repositories.ExamenRepositoryOtro;
+import org.aboylan.appmockito.ejemplos.repositories.PreguntaRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
@@ -16,10 +18,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ExamenServiceImplTest {
 
+    ExamenRepository repository;
+    ExamenService service;
+    PreguntaRepository preguntaRepository;
+
+    @BeforeEach
+    void setUp() {
+        repository = mock(ExamenRepository.class);
+        preguntaRepository = mock(PreguntaRepository.class);
+        service = new ExamenServiceImpl(repository, preguntaRepository);
+    }
+
     @Test
     void findExamenPorNombre() {
-        ExamenRepository repository = mock(ExamenRepository.class);
-        ExamenService service = new ExamenServiceImpl(repository);
         List<Examen> datos = Arrays.asList(
                 new Examen(5L, "Matematicas"),
                 new Examen(6L, "Lenguaje"),
@@ -36,15 +47,11 @@ class ExamenServiceImplTest {
 
     @Test
     void findExamenPorNombreListaVacia() {
-        ExamenRepository repository = mock(ExamenRepository.class);
-        ExamenService service = new ExamenServiceImpl(repository);
         List<Examen> datos = Collections.emptyList();
 
         when(repository.findAll()).thenReturn(datos);
         Optional<Examen> examen = service.findExamenPorNombre("Matematicas");
 
-        assertTrue(examen.isPresent());
-        assertEquals(5L, examen.orElseThrow().getId());
-        assertEquals("Matematicas", examen.get().getNombre());
+        assertFalse(examen.isPresent());
     }
 }
