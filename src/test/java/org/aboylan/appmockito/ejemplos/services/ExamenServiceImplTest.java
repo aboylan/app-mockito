@@ -7,6 +7,7 @@ import org.aboylan.appmockito.ejemplos.repositories.PreguntaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -153,4 +154,43 @@ class ExamenServiceImplTest {
         verify(preguntaRepository).findPreguntasPorExamenId(argThat(arg -> arg != null && arg >= 5L));
         //verify(preguntaRepository).findPreguntasPorExamenId(eq(5L));
     }
+
+    @Test
+    void trestArgumentMarchers2() {
+        when(repository.findAll()).thenReturn(Datos.EXAMENES_ID_NEGATIVOS);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        service.findExamenPorNombreConPreguntas("Matematicas");
+
+        verify(repository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat(new MiArgsMarchers()));
+    }
+
+    @Test
+    void trestArgumentMarchers3() {
+        when(repository.findAll()).thenReturn(Datos.EXAMENES_ID_NEGATIVOS);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        service.findExamenPorNombreConPreguntas("Matematicas");
+
+        verify(repository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat((argument) -> argument != null && argument > 0));
+    }
+
+    public static class MiArgsMarchers implements ArgumentMatcher<Long> {
+        private Long argument;
+        @Override
+        public boolean matches(Long aLong) {
+            this.argument = aLong;
+            return argument != null && argument > 0;
+        }
+
+        @Override
+        public String toString() {
+            return "es para in mensaje personalizado de error " +
+                    "que imprime mockito en caso de que falle el test " +
+                    argument + " debe ser un numero positivo";
+        }
+    }
+
 }
