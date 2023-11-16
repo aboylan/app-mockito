@@ -1,4 +1,4 @@
-package org.aboylan.appmockito.ejemplos.services;
+package org.aboylan.appmockito.ejemplos;
 
 import org.aboylan.appmockito.ejemplos.models.Examen;
 

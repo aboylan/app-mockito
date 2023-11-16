@@ -1,9 +1,11 @@
 package org.aboylan.appmockito.ejemplos.services;
 
+import org.aboylan.appmockito.ejemplos.Datos;
 import org.aboylan.appmockito.ejemplos.models.Examen;
 import org.aboylan.appmockito.ejemplos.repositories.ExamenRepository;
-import org.aboylan.appmockito.ejemplos.repositories.ExamenRepositoryOtro;
+import org.aboylan.appmockito.ejemplos.repositories.ExamenRepositoryImpl;
 import org.aboylan.appmockito.ejemplos.repositories.PreguntaRepository;
+import org.aboylan.appmockito.ejemplos.repositories.PreguntaRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +16,6 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class ExamenServiceImplTest {
 
     @Mock
-    ExamenRepository repository;
+    ExamenRepositoryImpl repository;
     @Mock
-    PreguntaRepository preguntaRepository;
+    PreguntaRepositoryImpl preguntaRepository;
 
     @InjectMocks
     ExamenServiceImpl service;
@@ -38,8 +39,8 @@ class ExamenServiceImplTest {
     @BeforeEach
     void setUp() {
 //        MockitoAnnotations.openMocks(this);
-//        repository = mock(ExamenRepository.class);
-//        preguntaRepository = mock(PreguntaRepository.class);
+//        repository = mock(ExamenRepositoryImpl.class);
+//        preguntaRepository = mock(PreguntaRepositoryImpl.class);
 //        service = new ExamenServiceImpl(repository, preguntaRepository);
     }
 
@@ -262,5 +263,17 @@ class ExamenServiceImplTest {
 
         verify(repository).guardar(any(Examen.class));
         verify(preguntaRepository).guardarVarias(anyList());
+    }
+
+    @Test
+    void testDoCallRealMethod() {
+        when(repository.findAll()).thenReturn(Datos.EXAMENES);
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        doCallRealMethod().when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+
+        Examen examen = service.findExamenPorNombreConPreguntas("Matematicas");
+
+        assertEquals(5L, examen.getId());
+        assertEquals("Matematicas", examen.getNombre());
     }
 }
