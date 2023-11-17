@@ -108,8 +108,9 @@ class ExamenServiceImplTest {
         Examen newExamen = Datos.EXAMEN;
         newExamen.setPreguntas(Datos.PREGUNTAS);
 
-        when(repository.guardar(any(Examen.class))).then(new Answer<Examen>(){
+        when(repository.guardar(any(Examen.class))).then(new Answer<Examen>() {
             Long secuencia = 8L;
+
             @Override
             public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
                 Examen examen = invocationOnMock.getArgument(0);
@@ -181,6 +182,7 @@ class ExamenServiceImplTest {
 
     public static class MiArgsMarchers implements ArgumentMatcher<Long> {
         private Long argument;
+
         @Override
         public boolean matches(Long aLong) {
             this.argument = aLong;
@@ -244,8 +246,9 @@ class ExamenServiceImplTest {
         Examen newExamen = Datos.EXAMEN;
         newExamen.setPreguntas(Datos.PREGUNTAS);
 
-        doAnswer(new Answer<Examen>(){
+        doAnswer(new Answer<Examen>() {
             Long secuencia = 8L;
+
             @Override
             public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
                 Examen examen = invocationOnMock.getArgument(0);
@@ -296,5 +299,32 @@ class ExamenServiceImplTest {
 
         verify(examenRepository).findAll();
         verify(preguntaRepository).findPreguntasPorExamenId(anyLong());
+    }
+
+    @Test
+    void testOrdenDeInvocaciones() {
+        when(repository.findAll()).thenReturn(Datos.EXAMENES);
+
+        service.findExamenPorNombreConPreguntas("Matematicas");
+        service.findExamenPorNombreConPreguntas("Lenguaje");
+
+        InOrder inOrder = inOrder(preguntaRepository);
+        inOrder.verify(preguntaRepository).findPreguntasPorExamenId(5L);
+        inOrder.verify(preguntaRepository).findPreguntasPorExamenId(6L);
+    }
+
+    @Test
+    void testOrdenDeInvocaciones2() {
+        when(repository.findAll()).thenReturn(Datos.EXAMENES);
+
+        service.findExamenPorNombreConPreguntas("Matematicas");
+        service.findExamenPorNombreConPreguntas("Lenguaje");
+
+        InOrder inOrder = inOrder(repository, preguntaRepository);
+        inOrder.verify(repository).findAll();
+        inOrder.verify(preguntaRepository).findPreguntasPorExamenId(5L);
+        
+        inOrder.verify(repository).findAll();
+        inOrder.verify(preguntaRepository).findPreguntasPorExamenId(6L);
     }
 }
